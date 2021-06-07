@@ -31,6 +31,17 @@ public class Station extends BaseEntity {
         this.name = name;
     }
 
+    private Station(Station station) {
+        this.id = station.id;
+        this.name = station.name;
+        this.createdDate = station.createdDate;
+        this.modifiedDate = station.modifiedDate;
+    }
+
+    public Station clone() {
+        return new Station(this);
+    }
+
     public static Station of(Long id,
                              String name,
                              LocalDateTime createdDate,

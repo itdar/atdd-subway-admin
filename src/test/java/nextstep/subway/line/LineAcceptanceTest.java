@@ -5,6 +5,7 @@ import io.restassured.response.Response;
 import nextstep.subway.AcceptanceTest;
 import nextstep.subway.line.dto.LineRequest;
 import nextstep.subway.line.dto.LineResponse;
+import nextstep.subway.station.domain.Station;
 import nextstep.subway.station.dto.StationResponse;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -52,7 +53,7 @@ public class LineAcceptanceTest extends AcceptanceTest {
         // and
         // Check stations
         LineResponse lineResponse = response.as(LineResponse.class);
-        List<StationResponse> stations = lineResponse.getStations();
+        List<Station> stations = lineResponse.getStations();
         List<String> names = getNamesFromStations(stations);
         assertThat(names).containsExactly("강남역", "역삼역");
     }
@@ -115,7 +116,7 @@ public class LineAcceptanceTest extends AcceptanceTest {
         // 지하철_노선_응답됨
         assertThat(response.statusCode()).isEqualTo(HttpStatus.OK.value());
         // 지하철 노선에 들어있는 역들을 상행종점부터 하행종점까지 반환한다.
-        List<StationResponse> stationResponses = response.body().as(LineResponse.class).getStations();
+        List<Station> stationResponses = response.body().as(LineResponse.class).getStations();
         List<String> resultStationNames = getNamesFromStations(stationResponses);
         assertThat(resultStationNames).containsExactly("강남역", "역삼역");
     }
@@ -201,7 +202,7 @@ public class LineAcceptanceTest extends AcceptanceTest {
         return new LineRequest(name6, color6, upStationId6, downStationId6, distance6);
     }
 
-    private List<String> getNamesFromStations(List<StationResponse> stationResponses) {
+    private List<String> getNamesFromStations(List<Station> stationResponses) {
         return stationResponses.stream()
                 .map(it -> it.getName())
                 .collect(Collectors.toList());
