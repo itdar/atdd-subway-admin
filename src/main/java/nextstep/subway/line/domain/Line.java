@@ -1,8 +1,12 @@
 package nextstep.subway.line.domain;
 
 import nextstep.subway.common.BaseEntity;
+import nextstep.subway.section.domain.Section;
+import nextstep.subway.section.domain.Sections;
+import nextstep.subway.station.domain.Station;
 
 import javax.persistence.*;
+import java.util.List;
 
 @Entity
 public class Line extends BaseEntity {
@@ -10,38 +14,49 @@ public class Line extends BaseEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(unique = true)
+    @Column(unique = true, nullable = false)
     private String name;
 
-    @Column(unique = true)
+    @Column(unique = true, nullable = false)
     private String color;
 
-    @Column(unique = true)
-    private Long upStationId;
-
-    @Column(unique = true)
-    private Long downStationId;
-
-    @Column(unique = true)
-    private int distance;
+    @Embedded
+    private Sections sections = new Sections();
 
     public Line() {
     }
 
-    public Line(String name, String color, Long upStationId, Long downStationId, int distance) {
+    private Line(String name, String color, Section section) {
         this.name = name;
         this.color = color;
-        this.upStationId = upStationId;
-        this.downStationId = downStationId;
-        this.distance = distance;
+        this.addSection(section);
+        section.setLine(this);
+    }
+
+    private Line(String name, String color) {
+        this.name = name;
+        this.color = color;
+    }
+
+    public static Line of(String name, String color, Section section) {
+        return new Line(name, color, section);
+    }
+
+    public static Line of(String name, String color) {
+        return new Line(name, color);
     }
 
     public void update(Line line) {
         this.name = line.getName();
         this.color = line.getColor();
-        this.upStationId = line.getUpStationId();
-        this.downStationId = line.getDownStationId();
-        this.distance = line.getDistance();
+    }
+
+    public Sections sections() {
+        return this.sections;
+    }
+
+    public List<Station> stations() {
+        return sections.stations();
     }
 
     public Long getId() {
@@ -56,15 +71,17 @@ public class Line extends BaseEntity {
         return color;
     }
 
-    public Long getUpStationId() {
-        return upStationId;
+    public void addSection(Section sectionIn) {
+        connect(sectionIn);
+        sectionIn.setLine(this);
     }
 
-    public Long getDownStationId() {
-        return downStationId;
+    private void connect(Section sectionIn) {
+        sections.validateConnectionWith(sectionIn);
+        sections.add(sectionIn);
     }
 
-    public int getDistance() {
-        return distance;
+    public void delete(Station station) {
+        sections.delete(station);
     }
 }

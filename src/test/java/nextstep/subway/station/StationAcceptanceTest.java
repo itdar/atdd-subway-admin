@@ -1,6 +1,5 @@
 package nextstep.subway.station;
 
-import io.restassured.RestAssured;
 import io.restassured.response.ExtractableResponse;
 import io.restassured.response.Response;
 import nextstep.subway.AcceptanceTest;
@@ -8,7 +7,6 @@ import nextstep.subway.station.dto.StationResponse;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -21,15 +19,19 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @DisplayName("지하철역 관련 기능")
 public class StationAcceptanceTest extends AcceptanceTest {
+
+    public static ExtractableResponse<Response> 지하철역_등록되어_있음(String stationName) {
+        Map<String, String> params = new HashMap<>();
+        params.put("name", stationName);
+
+        return postRequest("/stations", params);
+    }
+
     @DisplayName("지하철역을 생성한다.")
     @Test
     void createStation() {
-        // given
-        Map<String, String> params = new HashMap<>();
-        params.put("name", "강남역");
-
         // when
-        ExtractableResponse<Response> response = postLineRequest("/stations", params);
+        ExtractableResponse<Response> response = 지하철역_등록되어_있음("강남역");
 
         // then
         assertThat(response.statusCode()).isEqualTo(HttpStatus.CREATED.value());
@@ -42,10 +44,10 @@ public class StationAcceptanceTest extends AcceptanceTest {
         // given
         Map<String, String> params = new HashMap<>();
         params.put("name", "강남역");
-        postLineRequest("/stations", params);
+        postRequest("/stations", params);
 
         // when
-        ExtractableResponse<Response> response = postLineRequest("/stations", params);
+        ExtractableResponse<Response> response = postRequest("/stations", params);
 
         // then
         assertThat(response.statusCode()).isEqualTo(HttpStatus.BAD_REQUEST.value());
@@ -57,11 +59,11 @@ public class StationAcceptanceTest extends AcceptanceTest {
         /// given
         Map<String, String> params1 = new HashMap<>();
         params1.put("name", "강남역");
-        ExtractableResponse createResponse1 = postLineRequest("/stations", params1);
+        ExtractableResponse createResponse1 = postRequest("/stations", params1);
 
         Map<String, String> params2 = new HashMap<>();
         params2.put("name", "역삼역");
-        ExtractableResponse createResponse2 = postLineRequest("/stations", params2);
+        ExtractableResponse createResponse2 = postRequest("/stations", params2);
 
         // when
         ExtractableResponse<Response> response = get("/stations");
@@ -83,7 +85,7 @@ public class StationAcceptanceTest extends AcceptanceTest {
         // given
         Map<String, String> params = new HashMap<>();
         params.put("name", "강남역");
-        ExtractableResponse createResponse = postLineRequest("/stations", params);
+        ExtractableResponse createResponse = postRequest("/stations", params);
 
         // when
         String uri = createResponse.header("Location");
